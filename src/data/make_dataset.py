@@ -9,8 +9,12 @@ from tensorflow.python.keras import layers
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler
 import sys
 
-sys.path.insert(0, "..")
-root = Path("..")
+sys.path.append(".")
+
+from definitions import get_project_root
+
+
+root = get_project_root()
 
 
 def create_labeled_data():
@@ -56,12 +60,12 @@ def create_labeled_data():
 
 
 def create_train_test_validation(
-    train_ratio: float = 0.7, test_ratio: float = 0.15, validation_ratio: float = 0.15
+    train_ratio: float = 0.7, validation_ratio: float = 0.15, test_ratio: float = 0.15
 ):
     """This function will create a train, test and validation set including transformation and preprocessing steps like
     onehot encoding and scaling the numeric values"""
 
-    data_dir: Path = root / "processed"
+    data_dir: Path = root / "src" / "data" / "processed"
     input_file: str = "labeled_data.csv"
     file_path: Path = data_dir / input_file
 
@@ -75,8 +79,9 @@ def create_train_test_validation(
             logger.info(f"an error occured while trying to pd.read_csv {file_path}")
 
     else:
-        logger.info("Labeled data not found, creating a new file.")
-        create_labeled_data()
+        logger.info("Labeled data not found, try creating the dataset first.")
+        return
+        # create_labeled_data()
 
     ## remove these columns
     columns_to_drop = [
@@ -143,10 +148,26 @@ def create_train_test_validation(
         x = dataset[:, :-1]
         y = dataset[:, -1]
 
-        train_n = len(dataset) * train_ratio
-        test_n = len(dataset) * test_ratio
-        valid_n = len(dataset) * validation_ratio
-        x_train, x_test, x_valid = x[:train_n], x[train_n:test_n], x[test_n:valid_n]
-        y_train, y_test, y_valid = y[:train_n], y[train_n:test_n], y[test_n:valid_n]
+        train_n = int(len(dataset) * train_ratio)
+        valid_n = int(len(dataset) * validation_ratio)
+        test_n = int(len(dataset) * test_ratio)
 
-    return x_train, y_train, x_test, y_test, x_valid, y_valid
+        x_train, x_valid, x_test = (
+            x[:train_n],
+            x[train_n : len(dataset) - valid_n],
+            x[len(dataset) - test_n : len(dataset)],
+        )
+        y_train, y_valid, y_test = (
+            y[:train_n],
+            y[train_n : len(dataset) - valid_n],
+            y[len(dataset) - test_n : len(dataset)],
+        )
+
+    return (
+        x_train,
+        x_valid,
+        x_test,
+        y_train.reshape(-1, 1),
+        y_valid.reshape(-1, 1),
+        y_test.reshape(-1, 1),
+    )
