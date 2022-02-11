@@ -88,3 +88,5 @@ target/
 # Mypy cache
 .mypy_cache/
 src/data/test_functions.ipynb
+workspace.code-workspace
+src/data/test_functions.ipynb
