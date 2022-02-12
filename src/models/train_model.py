@@ -4,7 +4,7 @@ from tensorflow.python.keras.layers import (
     Flatten,
     Input,
     Dropout,
-    BatchNormalization,
+    # BatchNormalization,
     Reshape,
 )
 from tensorflow.keras.models import Sequential
@@ -16,7 +16,8 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras import Model
 from loguru import logger
 from pathlib import Path
-
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 import sys
 import keras_tuner as kt
@@ -33,6 +34,26 @@ from typing import Tuple, Optional, Union, Dict
 
 x_train, x_valid, x_test, y_train, y_valid, y_test = create_train_test_validation()
 x_train.shape, y_train.shape, x_valid.shape, y_valid.shape, x_test.shape, y_test.shape
+
+
+def simple_baseline():
+    ## Simple model / baseline: constant prediction.
+    ## yhat = 'Rock'
+
+    dummy_clf = DummyClassifier(
+        strategy="constant", constant=13
+    )  ## 13 is the value for Rock
+    dummy_clf.fit(x_train, y_train)
+
+    return dummy_clf.score(x_test, y_test)
+
+
+def get_randomforest_score():
+
+    rf_clf = RandomForestClassifier(n_estimators=100, random_state=0)
+    rf_clf.fit(x_train, y_train)
+
+    return rf_clf.score(x_test, y_test)
 
 
 def model_builder(hp):
