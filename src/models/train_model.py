@@ -38,7 +38,7 @@ x_train.shape, y_train.shape, x_valid.shape, y_valid.shape, x_test.shape, y_test
 
 def simple_baseline():
     ## Simple model / baseline: constant prediction.
-    ## yhat = 'Rock'
+    ## This predicts that all songs are "Rock" songs. This should lead to around 40% accuracy.
 
     dummy_clf = DummyClassifier(
         strategy="constant", constant=13
@@ -49,6 +49,7 @@ def simple_baseline():
 
 
 def get_randomforest_score():
+    ## Function to simply get the score for our evaluation
 
     rf_clf = RandomForestClassifier(n_estimators=100, random_state=0)
     rf_clf.fit(x_train, y_train)
@@ -57,6 +58,8 @@ def get_randomforest_score():
 
 
 def model_builder(hp):
+    ## Model builder which is the bases of our hypertuning
+
     model = Sequential()
 
     model.add(Dense(23, activation="relu", input_shape=(23,)))
@@ -75,6 +78,8 @@ def model_builder(hp):
 
 
 def tune_random_search():
+    ## Function to tune the model using the KT tuner
+
     log_dir = "logs_kt_random"
     tensorboard = TensorBoard(log_dir=log_dir)
 
